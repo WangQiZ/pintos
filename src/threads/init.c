@@ -128,12 +128,55 @@ pintos_init (void)
 #endif
 
   printf ("Boot complete.\n");
-  
+  /*
+   *要求开始输入PINTOS>
+   * 用户输入可打印字符，显示字符
+   * 输入换行符时，检查是不是whoami，exit 其他输入打印invalid command
+   * */
   if (*argv != NULL) {
     /* Run actions specified on kernel command line. */
     run_actions (argv);
   } else {
-    // TODO: no command line passed to kernel. Run interactively 
+      size_t cmd_len = 20;
+      char *buf = (char *)malloc(cmd_len); // command line input buffer
+
+      while (true) {
+          printf("PINTOS> ");
+          memset(buf, 0, cmd_len);
+          size_t index = 0;
+          //内层循环处理输入的字符, 遇见回车退出
+          while (true) {
+          char c = input_getc();
+          //处理回车
+          if (c == 13) {
+              printf("\n");
+              break;
+          }
+
+          if (c == 127) {
+              if (index > 0) {
+                  buf[--index] = '\0';
+                  printf("\b \b");
+              }
+
+          }
+          //处理可打印字符
+          if (c > 31 && c != 127) {
+              buf[index++] = c;
+              printf("%c",c);
+          }
+          }
+          //接受回车后
+          if (strcmp("whoami", buf) == 0)
+              printf("114514\n");
+          else if (strcmp("exit", buf) == 0) {
+              break;
+          }
+          else
+              printf("invalid command\n");
+      }
+      printf("Exit\n");
+      free(buf);
   }
 
   /* Finish up. */
